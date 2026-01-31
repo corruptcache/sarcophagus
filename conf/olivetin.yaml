@@ -12,7 +12,7 @@ actions:
   # ----------------------------------------------------------------
   - title: "Compress to CHD (Optical)"
     icon: "<img src='https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/7-zip-icon.png' width='48'/>"
-    shell: /scripts/root-kit/media/emulation/chd_manager.sh -d "{{ folder }}"
+    shell: /scripts/chd_manager.sh -d "{{ folder }}"
     timeout: 7200 # 2 Hours
     arguments:
       - name: folder
@@ -34,7 +34,7 @@ actions:
 
   - title: "Repair Bad PS2 Dumps"
     icon: "&#128657;" # Ambulance
-    shell: /scripts/root-kit/media/emulation/chd_manager.sh -d /data/ps2 -m repair
+    shell: /scripts/chd_manager.sh -d /data/ps2 -m repair
 
   # ----------------------------------------------------------------
   # GROUP 2: NINTENDO DISCS (RVZ)
@@ -43,7 +43,7 @@ actions:
   # ----------------------------------------------------------------
   - title: "Compress to RVZ (Nintendo)"
     icon: "<img src='https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/dolphin-icon.png' width='48'/>"
-    shell: /scripts/root-kit/media/emulation/rvz_manager.sh -d "{{ folder }}"
+    shell: /scripts/rvz_manager.sh -d "{{ folder }}"
     timeout: 7200
     arguments:
       - name: folder
@@ -62,7 +62,7 @@ actions:
   # ----------------------------------------------------------------
   - title: "Compress Switch (NSP -> NSZ)"
     icon: "&#128269;" # Switch-ish icon
-    shell: /scripts/root-kit/media/emulation/nsz_manager.sh -m convert -d "{{ folder }}"
+    shell: /scripts/nsz_manager.sh -m convert -d "{{ folder }}"
     timeout: 14400 # 4 Hours
     arguments:
       - name: folder
@@ -74,7 +74,7 @@ actions:
 
   - title: "Revert Switch (NSZ -> NSP)"
     icon: "&#8630;" # Undo Arrow
-    shell: /scripts/root-kit/media/emulation/nsz_manager.sh -m revert -d "{{ folder }}"
+    shell: /scripts/nsz_manager.sh -m revert -d "{{ folder }}"
     timeout: 14400
     arguments:
       - name: folder
@@ -86,7 +86,7 @@ actions:
 
   - title: "Cleanup Switch Duplicates"
     icon: "&#129529;" # Broom
-    shell: /scripts/root-kit/media/emulation/nsz_manager.sh -m cleanup -d "{{ folder }}"
+    shell: /scripts/nsz_manager.sh -m cleanup -d "{{ folder }}"
     arguments:
       - name: folder
         type: choice
@@ -97,7 +97,7 @@ actions:
 
   - title: "Optimize Xbox ISOs (Trim Padding)"
     icon: "&#128187;" # Computer
-    shell: /scripts/root-kit/media/emulation/xiso_manager.sh -d "{{ folder }}"
+    shell: /scripts/xiso_manager.sh -d "{{ folder }}"
     timeout: 3600
     arguments:
       - name: folder
@@ -114,7 +114,7 @@ actions:
   # ----------------------------------------------------------------
   - title: "Zip Retro Carts (Standard)"
     icon: "&#128452;" # File Cabinet
-    shell: /scripts/root-kit/media/emulation/zip_manager.sh -t file -m convert -d "{{ folder }}"
+    shell: /scripts/zip_manager.sh -t file -m convert -d "{{ folder }}"
     arguments:
       - name: folder
         type: choice
@@ -145,7 +145,7 @@ actions:
 
   - title: "Vita: Compress to VPK"
     icon: "&#128190;" # Floppy
-    shell: /scripts/root-kit/media/emulation/zip_manager.sh -t vita -m convert -d "{{ folder }}"
+    shell: /scripts/zip_manager.sh -t vita -m convert -d "{{ folder }}"
     arguments:
       - name: folder
         type: choice
@@ -156,7 +156,7 @@ actions:
 
   - title: "Vita: Revert to Folder"
     icon: "&#8630;" # Undo
-    shell: /scripts/root-kit/media/emulation/zip_manager.sh -t vita -m revert -d "{{ folder }}"
+    shell: /scripts/zip_manager.sh -t vita -m revert -d "{{ folder }}"
     arguments:
       - name: folder
         type: choice
@@ -172,7 +172,7 @@ actions:
   # ----------------------------------------------------------------
   - title: "PS3: Extract ISO to Folder (Strip Padding)"
     icon: "&#9888;" # Warning Sign
-    shell: /scripts/root-kit/media/emulation/trim_manager.sh -t ps3 -m convert -d "{{ folder }}"
+    shell: /scripts/trim_manager.sh -t ps3 -m convert -d "{{ folder }}"
     timeout: 7200
     arguments:
       - name: folder
@@ -184,7 +184,7 @@ actions:
 
   - title: "3DS: Trim ROM Headers"
     icon: "&#9888;" # Warning Sign
-    shell: /scripts/root-kit/media/emulation/trim_manager.sh -t 3ds -m convert -d "{{ folder }}"
+    shell: /scripts/trim_manager.sh -t 3ds -m convert -d "{{ folder }}"
     arguments:
       - name: folder
         type: choice
@@ -194,9 +194,9 @@ actions:
             value: "/data/3ds"
 
   # ----------------------------------------------------------------
-  # GROUP 6: MAINTENANCE
+  # NOTE ON UPDATES
+  # Since we are using "COPY scripts /scripts" in the Dockerfile,
+  # the scripts are baked into the image.
+  # To update scripts, you must "Rebuild" the Docker image,
+  # or map a local volume to /scripts in Unraid.
   # ----------------------------------------------------------------
-  - title: "Update Sarcophagus Scripts"
-    icon: "&#8635;" # Refresh Arrow
-    # Pulls latest changes from GitHub without restarting container
-    shell: cd /scripts/root-kit && git pull && chmod +x media/emulation/*.sh
