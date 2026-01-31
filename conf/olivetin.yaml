@@ -1,0 +1,202 @@
+# ==============================================================================
+#  SARCOPHAGUS CONTROL TERMINAL
+#  "The tomb for your digital history."
+#  Universal ROM Preservation Interface
+# ==============================================================================
+
+actions:
+  # ----------------------------------------------------------------
+  # GROUP 1: OPTICAL MEDIA (CHD)
+  # Target: PS1, PS2, Saturn, Sega CD, Dreamcast, PC Engine
+  # Tool: chdman (Lossless, Reversible)
+  # ----------------------------------------------------------------
+  - title: "Compress to CHD (Optical)"
+    icon: "<img src='https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/7-zip-icon.png' width='48'/>"
+    shell: /scripts/root-kit/media/emulation/chd_manager.sh -d "{{ folder }}"
+    timeout: 7200 # 2 Hours
+    arguments:
+      - name: folder
+        type: choice
+        title: Select System
+        choices:
+          - title: "PlayStation 1"
+            value: "/data/ps1"
+          - title: "PlayStation 2"
+            value: "/data/ps2"
+          - title: "Sega Saturn"
+            value: "/data/saturn"
+          - title: "Sega Dreamcast"
+            value: "/data/dreamcast"
+          - title: "Sega CD"
+            value: "/data/segacd"
+          - title: "PC Engine CD"
+            value: "/data/pcenginecd"
+
+  - title: "Repair Bad PS2 Dumps"
+    icon: "&#128657;" # Ambulance
+    shell: /scripts/root-kit/media/emulation/chd_manager.sh -d /data/ps2 -m repair
+
+  # ----------------------------------------------------------------
+  # GROUP 2: NINTENDO DISCS (RVZ)
+  # Target: GameCube, Wii
+  # Tool: dolphin-tool (Lossless, Reversible)
+  # ----------------------------------------------------------------
+  - title: "Compress to RVZ (Nintendo)"
+    icon: "<img src='https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/dolphin-icon.png' width='48'/>"
+    shell: /scripts/root-kit/media/emulation/rvz_manager.sh -d "{{ folder }}"
+    timeout: 7200
+    arguments:
+      - name: folder
+        type: choice
+        title: Select System
+        choices:
+          - title: "Nintendo GameCube"
+            value: "/data/gamecube"
+          - title: "Nintendo Wii"
+            value: "/data/wii"
+
+  # ----------------------------------------------------------------
+  # GROUP 3: MODERN FLASH (NSZ / XISO)
+  # Target: Switch, Xbox
+  # Tool: nsz, extract-xiso
+  # ----------------------------------------------------------------
+  - title: "Compress Switch (NSP -> NSZ)"
+    icon: "&#128269;" # Switch-ish icon
+    shell: /scripts/root-kit/media/emulation/nsz_manager.sh -m convert -d "{{ folder }}"
+    timeout: 14400 # 4 Hours
+    arguments:
+      - name: folder
+        type: choice
+        title: Switch Library
+        choices:
+          - title: "Nintendo Switch"
+            value: "/data/switch"
+
+  - title: "Revert Switch (NSZ -> NSP)"
+    icon: "&#8630;" # Undo Arrow
+    shell: /scripts/root-kit/media/emulation/nsz_manager.sh -m revert -d "{{ folder }}"
+    timeout: 14400
+    arguments:
+      - name: folder
+        type: choice
+        title: Switch Library
+        choices:
+          - title: "Nintendo Switch"
+            value: "/data/switch"
+
+  - title: "Cleanup Switch Duplicates"
+    icon: "&#129529;" # Broom
+    shell: /scripts/root-kit/media/emulation/nsz_manager.sh -m cleanup -d "{{ folder }}"
+    arguments:
+      - name: folder
+        type: choice
+        title: Switch Library
+        choices:
+          - title: "Nintendo Switch"
+            value: "/data/switch"
+
+  - title: "Optimize Xbox ISOs (Trim Padding)"
+    icon: "&#128187;" # Computer
+    shell: /scripts/root-kit/media/emulation/xiso_manager.sh -d "{{ folder }}"
+    timeout: 3600
+    arguments:
+      - name: folder
+        type: choice
+        title: Xbox Library
+        choices:
+          - title: "Original Xbox"
+            value: "/data/xbox"
+
+  # ----------------------------------------------------------------
+  # GROUP 4: CARTRIDGES & VITA (ZIP)
+  # Target: Retro Carts, PS Vita
+  # Tool: 7-zip (Lossless, Reversible)
+  # ----------------------------------------------------------------
+  - title: "Zip Retro Carts (Standard)"
+    icon: "&#128452;" # File Cabinet
+    shell: /scripts/root-kit/media/emulation/zip_manager.sh -t file -m convert -d "{{ folder }}"
+    arguments:
+      - name: folder
+        type: choice
+        title: Select System
+        choices:
+          - title: "NES"
+            value: "/data/nes"
+          - title: "SNES"
+            value: "/data/snes"
+          - title: "N64"
+            value: "/data/n64"
+          - title: "Game Boy"
+            value: "/data/gb"
+          - title: "Game Boy Color"
+            value: "/data/gbc"
+          - title: "Game Boy Advance"
+            value: "/data/gba"
+          - title: "Sega Genesis"
+            value: "/data/genesis"
+          - title: "Sega Game Gear"
+            value: "/data/gamegear"
+          - title: "Sega Master System"
+            value: "/data/mastersystem"
+          - title: "Neo Geo Pocket / Color"
+            value: "/data/ngpc"
+          - title: "WonderSwan / Color"
+            value: "/data/wonderswan"
+
+  - title: "Vita: Compress to VPK"
+    icon: "&#128190;" # Floppy
+    shell: /scripts/root-kit/media/emulation/zip_manager.sh -t vita -m convert -d "{{ folder }}"
+    arguments:
+      - name: folder
+        type: choice
+        title: Vita Library
+        choices:
+          - title: "PS Vita"
+            value: "/data/psvita"
+
+  - title: "Vita: Revert to Folder"
+    icon: "&#8630;" # Undo
+    shell: /scripts/root-kit/media/emulation/zip_manager.sh -t vita -m revert -d "{{ folder }}"
+    arguments:
+      - name: folder
+        type: choice
+        title: Vita Library
+        choices:
+          - title: "PS Vita"
+            value: "/data/psvita"
+
+  # ----------------------------------------------------------------
+  # GROUP 5: DESTRUCTIVE TRIMMING (NO UNDO)
+  # Target: PS3, 3DS
+  # Tool: 7-zip (Extract), Python (Trim)
+  # ----------------------------------------------------------------
+  - title: "PS3: Extract ISO to Folder (Strip Padding)"
+    icon: "&#9888;" # Warning Sign
+    shell: /scripts/root-kit/media/emulation/trim_manager.sh -t ps3 -m convert -d "{{ folder }}"
+    timeout: 7200
+    arguments:
+      - name: folder
+        type: choice
+        title: PS3 Library
+        choices:
+          - title: "PlayStation 3"
+            value: "/data/ps3"
+
+  - title: "3DS: Trim ROM Headers"
+    icon: "&#9888;" # Warning Sign
+    shell: /scripts/root-kit/media/emulation/trim_manager.sh -t 3ds -m convert -d "{{ folder }}"
+    arguments:
+      - name: folder
+        type: choice
+        title: 3DS Library
+        choices:
+          - title: "Nintendo 3DS"
+            value: "/data/3ds"
+
+  # ----------------------------------------------------------------
+  # GROUP 6: MAINTENANCE
+  # ----------------------------------------------------------------
+  - title: "Update Sarcophagus Scripts"
+    icon: "&#8635;" # Refresh Arrow
+    # Pulls latest changes from GitHub without restarting container
+    shell: cd /scripts/root-kit && git pull && chmod +x media/emulation/*.sh
