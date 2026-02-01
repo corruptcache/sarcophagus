@@ -1,13 +1,12 @@
 # ==========================================
-# SARCOPHAGUS v2 (OMNIBUS)
-# Universal Compression: ISO, CHD, RVZ, NSZ, XISO, WUA
+# SARCOPHAGUS v1.0
 # ==========================================
 
 # --- STAGE 1: THE FORGE (Builder) ---
-# We use this stage to compile tools that aren't in apt-get
 FROM ubuntu:22.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 
+# 1. Install Build Dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -16,13 +15,13 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libzstd-dev
 
-# 1. Build extract-xiso (Xbox)
+# 2. Build extract-xiso (Xbox)
 WORKDIR /tmp/xiso
 RUN git clone https://github.com/XboxDev/extract-xiso.git . && \
     mkdir build && cd build && \
     cmake .. && make
 
-# 2. Build ZArchive (Wii U .wua support)
+# 3. Build ZArchive (Wii U .wua support)
 WORKDIR /tmp/zarchive
 RUN git clone https://github.com/Exzap/ZArchive.git . && \
     mkdir build && cd build && \
@@ -45,20 +44,17 @@ RUN apt-get update && \
     mame-tools \
     ffmpeg \
     zlib1g \
-    # Required for Switch compression
-    libssl-dev && \
-    # Add Dolphin PPA
+    libssl-dev \
+    libzstd1 && \
     add-apt-repository ppa:ubuntuhandbook1/dolphin-emu -y && \
     apt-get update && \
     apt-get install -y --no-install-recommends dolphin-emu && \
-    # Clean up
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Install Python Tools (Switch)
-# 'nsz' tool compresses Switch dumps perfectly
 RUN pip3 install --no-cache-dir nsz
 
-# 3. Copy Compiled Tools from The Forge
+# 3. Copy Compiled Tools
 COPY --from=builder /tmp/xiso/build/extract-xiso /usr/local/bin/extract-xiso
 COPY --from=builder /tmp/zarchive/build/zarchive /usr/local/bin/zarchive
 
@@ -72,8 +68,15 @@ RUN VERSION=$(curl -s https://api.github.com/repos/OliveTin/OliveTin/releases/la
 COPY scripts /scripts
 RUN chmod -R +x /scripts
 
-
+# 6. Setup Auto-Config [NEW]
+# Create a defaults folder and copy your local config there
+RUN mkdir -p /defaults
+COPY conf/olivetin.yaml /defaults/config.yaml
 
 WORKDIR /config
 EXPOSE 1337
+
+# 7. Set Entrypoint [NEW]
+# Use the script we just created to handle the setup
+ENTRYPOINT ["/scripts/entrypoint.sh"]
 CMD ["OliveTin"]
