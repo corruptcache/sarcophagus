@@ -12,7 +12,9 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
-    zlib1g-dev
+    pkg-config \
+    zlib1g-dev \
+    libzstd-dev
 
 # 1. Build extract-xiso (Xbox)
 WORKDIR /tmp/xiso
@@ -74,4 +76,4 @@ RUN chmod -R +x /scripts
 
 WORKDIR /config
 EXPOSE 1337
-CMD ["/usr/bin/OliveTin"]
+CMD ["OliveTin"]
